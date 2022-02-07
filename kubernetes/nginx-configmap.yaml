@@ -1,0 +1,53 @@
+apiVersion: v1
+data:
+  default.conf: |-
+    server {
+      listen       80;
+        server_name  localhost, backend, frontend, hye.tech4comp.dbis.rwth-aachen.de;
+        client_max_body_size 500m;
+        access_log  /var/log/nginx/host.access.log  main;
+        
+        location /hye-youtube {
+            proxy_pass http://backend:8080/hye-youtube;
+            # proxy_set_header Host 'http://backend:8080/hye-youtube/';
+        }
+
+        location /las2peer {
+            proxy_pass http://backend:8080/las2peer;
+            # proxy_set_header Host 'http://backend:8080/las2peer/';
+        }
+
+        location /contactservice {
+            proxy_pass http://backend:8080/contactservice;
+            # proxy_set_header Host 'http://backend:8080/contactservice/';
+        }
+
+        location /fileservice/ {
+            proxy_pass 'http://backend:8080/';
+            # proxy_set_header Host 'http://backend:8080/fileservice/';
+        }
+
+        location /config/ {
+            proxy_pass 'http://frontend:8000/dev/config.html';
+            # proxy_set_header Host 'http://frontend:8000/dev/config.html';
+        }
+
+        location /watch/ {
+            proxy_pass 'http://frontend:8000/dev/video.html';
+            # proxy_set_header Host 'http://frontend:8000/dev/video.html';
+        }
+
+        location /results/ {
+            proxy_pass 'http://frontend:8000/dev/search.html';
+            # proxy_set_header Host 'http://frontend:8000/dev/search.html';
+        }
+
+        location / {
+            proxy_pass 'http://frontend:8000/';
+            # proxy_set_header Host 'http://frontend:8000/';
+        }
+    }
+kind: ConfigMap
+metadata:
+  name: nginx-config
+  namespace: ma-kretschmer

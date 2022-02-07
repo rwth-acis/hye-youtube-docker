@@ -1,0 +1,44 @@
+version: "3"
+services:
+  ethereum:
+    image: rwthacis/monitored-geth-client
+    ports:
+      - 30303:30303/udp
+      - 30303:30303/tcp
+      - 8545:8545/tcp
+      - 8546:8546/tcp
+    environment:
+      GETH_VERBOSITY: "3"
+
+      ETHEREUM_DATA_DIR: /root/.ethereum/devchain
+    volumes:
+      - ethereumStoragePersistent:/root/.ethereum/devchain
+    command: /root/start.sh
+  backend:
+    image: rwthacis/hye-youtube-proxy
+    environment:
+      LAS2PEER_ETH_HOST: ethereum:8545
+      CONTACT_STORER_PW: changeme
+    volumes:
+      - las2peerNodeStorage:/app/node-storage
+    depends_on:
+      - ethereum
+  # recommendations:
+  #   image: rwthacis/hye-youtube-recommendations
+  #   depends_on:
+  #     - backend
+  frontend:
+    image: rwthacis/hye-youtube-frontend
+    depends_on:
+      - backend
+  nginx:
+    image: nginx
+    volumes:
+      - ./default.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - 8081:8081
+    depends_on:
+      - frontend
+volumes:
+  ethereumStoragePersistent: {}
+  las2peerNodeStorage: {}

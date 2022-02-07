@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose -v convert
+    kompose.version: 1.26.1 (a9d05d509)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: backend
+  name: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: backend
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose -v convert
+        kompose.version: 1.26.1 (a9d05d509)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: backend
+    spec:
+      containers:
+        - env:
+            - name: LAS2PEER_ETH_HOST
+              value: ethereum:8545
+            - name: CONTACT_STORER_PW
+              value: ---REDACTED---
+            - name: FRONTEND_URLS
+              value: https://hye.tech4comp.dbis.rwth-aachen.de/
+            - name: WEBCONNECTOR_URL
+              value: https://hye.tech4comp.dbis.rwth-aachen.de/hye-youtube/
+          image: rwthacis/hye-youtube-proxy
+          name: backend
+          resources: {}
+          volumeMounts:
+            - mountPath: /app/las2peer/node-storage
+              name: node-storage
+      restartPolicy: Always
+      volumes:
+        - name: node-storage
+          persistentVolumeClaim:
+            claimName: las2peer-node-storage
+status: {}
