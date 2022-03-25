@@ -11,7 +11,6 @@ NODE_ID_SEED=${NODE_ID_SEED:-$RANDOM}
 
 # set some helpful variables
 export SERVICE_PROPERTY_FILE='etc/i5.las2peer.services.contactService.ContactService.properties'
-export WEB_CONNECTOR_PROPERTY_FILE='etc/i5.las2peer.connectors.webConnector.WebConnector.properties'
 export CONTACT_SERVICE_VERSION=$(ls lib/ | grep contactService | grep -o "[0-9]\.[0-9]\.[0-9]")
 export FILE_SERVICE_VERSION=$(ls lib/ | grep fileService | grep -o "[0-9]\.[0-9]\.[0-9]")
 export USERINFORMATION_SERVICE_VERSION=$(ls lib/ | grep userInformationService | grep -o "[0-9]\.[0-9]\.[0-9]")
@@ -87,9 +86,9 @@ echo external_address = $(curl -s https://ipinfo.io/ip):${LAS2PEER_PORT} > etc/p
 # start the service within a las2peer node
 if [[ -z "${@}" ]]; then
     if [ -n "$LAS2PEER_ETH_HOST" ]; then
-        exec ${LAUNCH_COMMAND} --observer --node-id-seed $NODE_ID_SEED --ethereum-mnemonic "$(selectMnemonic)" startService\("'""${CONTACT_SERVICE}""'"\) startService\("'""${FILE_SERVICE}""'"\) startService\("'""${USERINFORMATION_SERVICE}""'"\) startWebConnector "node=getNodeAsEthereumNode()" "registry=node.getRegistryClient()" "n=getNodeAsEthereumNode()" "r=n.getRegistryClient()"
+        exec ${LAUNCH_COMMAND} --observer --node-id-seed $NODE_ID_SEED --ethereum-mnemonic "$(selectMnemonic)" startService\("'""${CONTACT_SERVICE}""'"\) startService\("'""${FILE_SERVICE}""'"\) startService\("'""${USERINFORMATION_SERVICE}""'"\) "node=getNodeAsEthereumNode()" "registry=node.getRegistryClient()" "n=getNodeAsEthereumNode()" "r=n.getRegistryClient()"
     else
-        exec ${LAUNCH_COMMAND} --observer --node-id-seed $NODE_ID_SEED startService\("'""${CONTACT_SERVICE}""'"\) startService\("'""${FILE_SERVICE}""'"\) startService\("'""${USERINFORMATION_SERVICE}""'"\) startWebConnector
+        exec ${LAUNCH_COMMAND} --observer --node-id-seed $NODE_ID_SEED startService\("'""${CONTACT_SERVICE}""'"\) startService\("'""${FILE_SERVICE}""'"\) startService\("'""${USERINFORMATION_SERVICE}""'"\)
     fi
 else
     exec ${LAUNCH_COMMAND} ${@}

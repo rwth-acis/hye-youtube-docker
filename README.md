@@ -1,8 +1,22 @@
 # HyE - YouTube Docker
 This repository contains the deployment files for docker-compose and kubernetes of the HyE - YouTube Service, developed as part of the Master Thesis _``Implementing and evaluating recommendation sharing to increase diversity on YouTube''._
 
+## Startup
+The provided docker-compose should start all required components automatically.
+To use it simply run `docker-compose up`.
+However, their are a couple of additional setup steps needed:
+
+### Create database and user
+Once the MySQL database is up and running, exec into it with `docker exec -it hye-youtube-docker_mysql_1 /bin/sh`, start the mysql client via the command `mysql -p`, and enter the root password.
+Then [create the database](https://www.mysqltutorial.org/mysql-create-database/) and [database user](https://www.digitalocean.com/community/tutorials/how-to-create-a-new-user-and-grant-permissions-in-mysql).
+
+### Start missing services
+Upon first startup, the blockchain is initialized and the smart contracts deployed.
+This takes a while which causes the *l2pservices* and *recommendations* containers to fail, intern leading to the *frontend* container to not getting started.
+Thus, after the las2peer node inside the *backend* container is up and running and the database has been set up, run the `docker-compose up` command again, to start the previously failed containers.
+
 ## Components
-The entire service consists of three sub-systems (frontend, proxy service, recommendation service) and the deployment of two additional components (ethereum blockchain and nginx reverse proxy), which are briefly explained in the following.
+The entire service consists of four sub-systems (frontend, proxy service, recommendation service, and mllib) and the deployment of four additional components (ethereum blockchain, nginx reverse proxy, a MySQL database, and three additional las2peer services), which are briefly explained in the following.
 
 ### Ethereum blockchain
 The deployment features one ethereum blockchain node which is built from [this Dockerfile](https://github.com/rwth-acis/las2peer-ethereum-cluster/blob/master/docker-images/monitored-geth-client/Dockerfile). Since las2peer in general and our service in particular makes use of smart contracts deployed to this blockchain, it should be started first.
@@ -10,18 +24,19 @@ The deployment features one ethereum blockchain node which is built from [this D
 ### HyE - YouTube Proxy
 The Proxy service is a [las2peer](https://github.com/rwth-acis/las2peer) service and as such its docker deployment starts a las2peer node which automatically attempts to connect to an ethereum blockchainlocated at **ethereum:8545** (both docker-compose and kubernetes implement a DNS to resolve this address to the container's actual IP address).
 The container started as part of this deployment runs the docker image built from [this Dockerfile](https://github.com/rwth-acis/HyE-YouTube-Proxy/blob/master/docker/Dockerfile) in the respective repository.
-In order to deploy and start the service, it has to be uploaded to the las2peer network.
-This is done by logging into the Node Front-End, which by default is served under http://localhost:8081/las2peer, and uploading the service via the [Publish Service](http://localhost:8080/las2peer/webapp/publish-service) tab.
-*Note that the upload will probably fail, due to a dependency which exceeds las2peer maximum allowed size of 5MB, however the service can still be started on the node launched by the provided docker image, since the service is contained in its library and classpath*.
-Once the upload is finished, start the service via the [View Services](http://localhost:8080/las2peer/webapp/view-services) tab and afterwards visit [/hye-youtube/init](http://localhost:8080/hye-youtube/init) to initialize the service.
-***For more details regarding the configuration of this service, please refer to the [README](https://github.com/rwth-acis/hye-youtube-proxy#configurations-properties) contained in its repository***
+The Proxy service is then automatically started together with the node and web connector, which by default is served under http://localhost:8081/las2peer.
+*Uploading the service via the Node Frontend is not possible, due to a dependency which exceeds las2peer maximum allowed size of 5MB.*
+Once the node has started, visit [/hye-youtube/init](http://localhost:8080/hye-youtube/init) to initialize the service.
+***For more details regarding the configuration of this service, please refer to the [README](https://github.com/rwth-acis/hye-youtube-proxy#configurations-properties) contained in its repository.***
 
-#### Frontend dependencies
-The HyE - YouTube frontend requires the following additional services to function, which also have to be uploaded and started via the las2peer Node Front-End:
+### las2peer services
+The HyE - YouTube frontend requires the following additional services to function:
 
-* [las2peer User Information Service](https://github.com/rwth-acis/las2peer-user-information-service) In order to upload and start this service, please download its source code [here](https://github.com/rwth-acis/las2peer-user-information-service/releases/tag/v0.2.3), build it according to instructions and deploy it to the las2peer network
-* [las2peer File Service](https://github.com/rwth-acis/las2peer-fileservice) In order to upload and start this service, please download its source code [here](https://github.com/rwth-acis/las2peer-FileService/releases/tag/v3.0.0), build it according to instructions and deploy it to the las2peer network
-* [las2peer Contact Service](https://github.com/rwth-acis/las2peer-contact-service) This service is deployed, just like the others, as described above, however it additionally requires the creation of a user agent. The credentials have to match the data passed to the backend deployment (see `HYE_SERVICE_AGENT_NAME` and `HYE_SERVICE_AGENT_PW` in the table below)
+* [las2peer User Information Service](https://github.com/rwth-acis/las2peer-user-information-service)
+* [las2peer File Service](https://github.com/rwth-acis/las2peer-fileservice)
+* [las2peer Contact Service](https://github.com/rwth-acis/las2peer-contact-service)
+
+These services are started by the l2pservices node which attempts to connect to a locally running blockchain node and a las2peer bootstrap node (the one, running the Proxy services).
 
 #### Configuration parameters
 The following parameters are passed as environment variables either to the respective container in the docker-compose file or the respective kubernetes deployment file.

@@ -17,15 +17,28 @@ services:
     image: rwthacis/hye-youtube-proxy
     environment:
       LAS2PEER_ETH_HOST: ethereum:8545
-      HYE_SERVICE_AGENT_NAME: hye
+      HYE_SERVICE_AGENT_NAME: hyeAgent
       HYE_SERVICE_AGENT_PW: changeme
-    volumes:
-      - las2peerNodeStorage:/app/node-storage
+#    volumes:
+#      - proxyNodeStorage:/app/HyE-YouTube-Proxy/node-storage
     ports:
       - 9011:9011/udp
       - 9011:9011/tcp
     depends_on:
       - ethereum
+  l2pservices:
+    build: l2pservices/.
+    environment:
+      LAS2PEER_PORT: 9012
+      LAS2PEER_ETH_HOST: ethereum:8545
+      BOOTSTRAP: "backend:9011"
+      CONTACT_STORER_NAME: hyeAgent
+      CONTACT_STORER_PW: changeme
+    volumes:
+      - ./i5.las2peer.registry.data.RegistryConfiguration.properties:/src/etc/i5.las2peer.registry.data.RegistryConfiguration.properties
+#      - servicesNodeStorage:/src/node-storage
+    depends_on:
+      - backend
   mysql:
     image: mysql:5.7
     volumes:
@@ -41,14 +54,18 @@ services:
   recommendations:
     image: rwthacis/hye-youtube-recommendations
     environment:
-      LAS2PEER_PORT: 9012
+      LAS2PEER_PORT: 9013
+      LAS2PEER_ETH_HOST: ethereum:8545
       BOOTSTRAP: "backend:9011"
       MY_SQL_HOST: mysql
       ML_LIB_URL: "http://mllib:8000/"
       MY_SQL_USER_NAME: hye
       MY_SQL_USER_PW: changeme
-      HYE_SERVICE_AGENT_NAME: hye
+      HYE_SERVICE_AGENT_NAME: hyeAgent
       HYE_SERVICE_AGENT_PW: changeme
+    volumes:
+      - ./i5.las2peer.registry.data.RegistryConfiguration.properties:/src/etc/i5.las2peer.registry.data.RegistryConfiguration.properties
+#      - recommendationsNodeStorage:/src/node-storage
     depends_on:
       - backend
       - mysql
@@ -56,7 +73,7 @@ services:
   frontend:
     image: rwthacis/hye-youtube-frontend
     depends_on:
-      - backend
+      - l2pservices
   nginx:
     image: nginx
     volumes:
@@ -67,5 +84,7 @@ services:
       - frontend
 volumes:
   ethereumStoragePersistent: {}
-  las2peerNodeStorage: {}
+  servicesNodeStorage: {}
+  proxyNodeStorage: {}
+  recommendationsNodeStorage: {}
   mysqlStorage: {}
