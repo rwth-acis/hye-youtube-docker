@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose -v convert
+    kompose.version: 1.26.1 (a9d05d509)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: busybox
+  name: busybox
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: busybox
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose -v convert
+        kompose.version: 1.26.1 (a9d05d509)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: busybox
+    spec:
+      containers:
+        - image: praqma/network-multitool
+          name: busybox
+          resources: {}
+          volumeMounts:
+            - mountPath: /root
+              name: mysql-data-storage
+      restartPolicy: Always
+      volumes:
+         - name: mysql-data-storage
+           persistentVolumeClaim:
+             claimName: mysql-data-storage
+status: {}

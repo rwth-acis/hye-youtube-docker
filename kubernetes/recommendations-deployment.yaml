@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose -v convert
+    kompose.version: 1.26.1 (a9d05d509)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: recommendations
+  name: recommendations
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: recommendations
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose -v convert
+        kompose.version: 1.26.1 (a9d05d509)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: recommendations
+    spec:
+      containers:
+        - env:
+            - name: BOOTSTRAP
+              value: 137.226.232.70:32077
+            - name: LAS2PEER_PORT
+              value: '32078'
+            - name: NODE_ID_SEED
+              value: '2'
+          ports:
+          - containerPort: 32078
+            protocol: TCP
+          - containerPort: 32078
+            protocol: UDP
+          image: rwthacis/hye-youtube-recommendations
+          name: recommendations
+          volumeMounts:
+            - mountPath: /src/etc/i5.las2peer.services.hyeYouTubeRecommendations.YouTubeRecommendations.properties
+              name: recommendations-config-volume
+              subPath: i5.las2peer.services.hyeYouTubeRecommendations.YouTubeRecommendations.properties
+            - mountPath: /src/etc/i5.las2peer.registry.data.RegistryConfiguration.properties
+              name: registry-config-volume
+              subPath: i5.las2peer.registry.data.RegistryConfiguration.properties
+            - mountPath: /src/node-storage/
+              name: node-storage 
+          resources: {}
+      restartPolicy: Always
+      volumes:
+        - name: recommendations-config-volume
+          configMap:
+            name: recommendations-config
+        - name: registry-config-volume
+          configMap:
+            name: registry-config
+        - name: node-storage
+          persistentVolumeClaim:
+            claimName: recommendations-node-storage
+status: {}

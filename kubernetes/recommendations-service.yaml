@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose -v convert
+    kompose.version: 1.26.1 (a9d05d509)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: recommendations
+  name: recommendations
+spec:
+  ports:
+    - name: "32078tcp"
+      port: 32078
+      targetPort: 32078
+      protocol: TCP
+      nodePort: 32078
+    - name: "32078udp"
+      port: 32078
+      targetPort: 32078
+      protocol: UDP
+      nodePort: 32078
+  selector:
+    io.kompose.service: recommendations
+  type: NodePort
+status:
+  loadBalancer: {}

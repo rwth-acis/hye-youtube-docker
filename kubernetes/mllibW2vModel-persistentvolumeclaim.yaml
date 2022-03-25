@@ -3,12 +3,12 @@ kind: PersistentVolumeClaim
 metadata:
   creationTimestamp: null
   labels:
-    io.kompose.service: nginx-claim0
-  name: nginx-claim0
+    io.kompose.service: mllib-w2v-model
+  name: mllib-w2v-model
 spec:
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 100Mi
+      storage: 5Gi
 status: {}

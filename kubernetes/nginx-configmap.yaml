@@ -3,27 +3,32 @@ data:
   default.conf: |-
     server {
       listen       80;
-        server_name  localhost, backend, frontend, hye.tech4comp.dbis.rwth-aachen.de;
+        server_name  localhost, proxy, recommendations, frontend, hye.tech4comp.dbis.rwth-aachen.de;
         client_max_body_size 500m;
         access_log  /var/log/nginx/host.access.log  main;
         
         location /hye-youtube {
-            proxy_pass http://backend:8080/hye-youtube;
+            proxy_pass http://proxy:8080/hye-youtube;
             # proxy_set_header Host 'http://backend:8080/hye-youtube/';
         }
 
+        location /hye-recommendations {
+            proxy_pass http://proxy:8080/hye-recommendations;
+            # proxy_set_header Host 'http://backend:8080/hye-recommendations/';
+        }
+
         location /las2peer {
-            proxy_pass http://backend:8080/las2peer;
+            proxy_pass http://proxy:8080/las2peer;
             # proxy_set_header Host 'http://backend:8080/las2peer/';
         }
 
         location /contactservice {
-            proxy_pass http://backend:8080/contactservice;
+            proxy_pass http://proxy:8080/contactservice;
             # proxy_set_header Host 'http://backend:8080/contactservice/';
         }
 
         location /fileservice/ {
-            proxy_pass 'http://backend:8080/';
+            proxy_pass 'http://proxy:8080/';
             # proxy_set_header Host 'http://backend:8080/fileservice/';
         }
 

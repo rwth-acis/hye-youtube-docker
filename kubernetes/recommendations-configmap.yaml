@@ -1,0 +1,19 @@
+apiVersion: v1
+data:
+  i5.las2peer.services.hyeYouTubeRecommendations.YouTubeRecommendations.properties: |-
+    clientId = 999885376616-ualpak49t7k7e29pj7iaov1j33e2sl2p.apps.googleusercontent.com
+    clientSecret = secret
+    apiKey = secret
+    mysqlHost = mysql
+    mysqlDatabase = hye
+    mysqlUser = hye
+    mysqlPassword = changeme
+    mlLibUrl = http://mllib:8000/
+    modelName = HyE-MatrixFactorization
+    serviceAgentName = hyeAgent
+    serviceAgentPw = changeme
+    rootUri = https://hye.tech4comp.dbis.rwth-aachen.de/hye-recommendations/
+kind: ConfigMap
+metadata:
+  name: recommendations-config
+  namespace: ma-kretschmer

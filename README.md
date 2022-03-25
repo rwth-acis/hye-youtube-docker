@@ -21,10 +21,10 @@ The HyE - YouTube frontend requires the following additional services to functio
 
 * [las2peer User Information Service](https://github.com/rwth-acis/las2peer-user-information-service) In order to upload and start this service, please download its source code [here](https://github.com/rwth-acis/las2peer-user-information-service/releases/tag/v0.2.3), build it according to instructions and deploy it to the las2peer network
 * [las2peer File Service](https://github.com/rwth-acis/las2peer-fileservice) In order to upload and start this service, please download its source code [here](https://github.com/rwth-acis/las2peer-FileService/releases/tag/v3.0.0), build it according to instructions and deploy it to the las2peer network
-* [las2peer Contact Service](https://github.com/rwth-acis/las2peer-contact-service) This service is deployed, just like the others, as described above, however it additionally requires the creation of a user agent. This is also best achieved using the Node Front-End via the [Agent Tools](http://localhost:8080/las2peer/webapp/agent-tools) tab. The credentials have to match the data passed to the backend deployment (see `CONTACT_STORER_NAME` and `CONTACT_STORER_PW` in the table below).
+* [las2peer Contact Service](https://github.com/rwth-acis/las2peer-contact-service) This service is deployed, just like the others, as described above, however it additionally requires the creation of a user agent. The credentials have to match the data passed to the backend deployment (see `HYE_SERVICE_AGENT_NAME` and `HYE_SERVICE_AGENT_PW` in the table below)
 
 #### Configuration parameters
-The following parameters are passed as enviornment variables either to the respective container in the docker-compose file or the respective kubernetes deployment file.
+The following parameters are passed as environment variables either to the respective container in the docker-compose file or the respective kubernetes deployment file.
 
 | Variable Name | Default Value | Description |
 | ------------- | ------------- | ----------- |
@@ -35,14 +35,41 @@ The following parameters are passed as enviornment variables either to the respe
 | `GROUP_REGISTRY_ADDRESS` | 0x1A37393184eD5D0040521728cBbfc819e07E9d20 | Location of the group registry on the blockchain (required by las2peer core) |
 | `SERVICE_REGISTRY_ADDRESS` | 0x4930DC85997124F6cFBe8fAE727EA69E9577BBBc | Location of the service registry on the blockchain (required by las2peer core) |
 | `CONSENT_REGISTRY_ADDRESS` | 0xC58238a482e929584783d13A684f56Ca5249243E | See [service README](https://github.com/rwth-acis/hye-youtube-proxy#configurations-properties) |
-| `CONTACT_STORER_NAME` | contactstorer | Name of the user created as part of the las2peer Contact Service deployment |
-| `CONTACT_STORER_PW` | supersecretpassword | Password associated with the user created as part of the las2peer Contact Service deployment |
+| `HYE_SERVICE_AGENT_NAME` | hyeAgent | Name of the las2peer service agent (the service attempts to create it upon container startup) |
+| `HYE_SERVICE_AGENT_PW` | changeme | Password associated with the service agent |
 | `WEBCONNECTOR_URL` | http://localhost:8080/hye-youtube/ | See `rootUri` in [service README](https://github.com/rwth-acis/hye-youtube-proxy#configurations-properties) |
 | `FRONTEND_URLS` | localhost:8000,hye-youtube.de | See [service README](https://github.com/rwth-acis/hye-youtube-proxy#configurations-properties) |
 | `SLEEP_FOR` | 30 | Time in seconds to wait before deploying the smart contracts (i.e., the above described registries) to the ethereum blockchain (generally, does not need to be changed) |
 
 ### HyE - YouTube Recommendations
-***Yet to be implemented***
+The Recommendations service is a also a [las2peer](https://github.com/rwth-acis/las2peer) service starting a las2peer node and trying to connect to the blockchain.
+This service's Dockerfile can be inspected [here](https://github.com/rwth-acis/hye-youtube-recommendations/blob/master/Dockerfile), in the respective repository.
+Upon starting the container, and thus the las2peer node, the service is started automatically as well.
+***For more details about this service, please refer to the [README](https://github.com/rwth-acis/hye-youtube-recommendations/blob/master/README.md) contained in its repository***
+
+#### Dependencies
+This service relies on multiple other services to properly function.
+This includes a MySQL database and the Python MlLib service, which is also part of this docker-compose deployment, but additional setup steps are required, such as the creation of a Google OAuth client and API token.
+For detailed information, please refer to the service's [README](https://github.com/rwth-acis/hye-youtube-recommendations/blob/master/README.md).
+
+#### Configuration parameters
+The following parameters are passed as environment variables either to the respective container in the docker-compose file or the respective kubernetes deployment file.
+
+| Variable Name | Default Value | Description |
+| ------------- | ------------- | ----------- |
+| `BOOTSTRAP` | - | Domain and port of running las2peer node to connect to, instead of starting a new network |
+| `LAS2PEER_ETH_HOST` | - | Denotes the location of the ethereum blockchain and should generally be set to `ethereum:8545` |
+| `HYE_SERVICE_AGENT_NAME` | hyeAgent | Name of the las2peer service agent (has to be created beforehand) |
+| `HYE_SERVICE_AGENT_PW` | changeme | Password associated with the service agent |
+| `ML_LIB_URL` | http://localhost:8000/ | Location of Python MlLib server used to compute matrix factorization and word2vec embeddings |
+| `MODEL_NAME` | HyE-MatrixFactorization | Name of the matrix factorization model created by the service |
+| `MY_SQL_HOST` | localhost | Host domain of MySQL database |
+| `MY_SQL_DATABASE` | hye | Database name in connected MySQL database |
+| `MY_SQL_USER_NAME` | newuser | User name of MySQL database user used by service |
+| `MY_SQL_USER_PW` | changeme | User password of MySQL database user used by service |
+| `API_KEY` | - | Google API key required to retrieve YouTube video data |
+| `CLIENT_ID` | - | Google API OAuth client ID required to retrieve personal access tokens for YouTube Data API |
+| `CLIENT_SECRET` | - | Google API OAuth client secret associated with given ID |
 
 ### HyE - YouTube Frontend
 A web frontend based on Google's [Lit Element](https://lit.dev/) providing access to the above described service's functionality.
@@ -50,10 +77,19 @@ The source code of the docker image can be found in the project's repository [he
 Make sure to set the `BASE_URL` environment variable to URL under which your deployment of the frontend will be available.
 By default this value is set to *http://localhost:8081/*.
 
+### Python MlLib
+This small service performs the matrix factorization and word2vec embedding computations required by the HyE Recommendations service.
+For this, a pre-trained word2vec model file with the proper format is required.
+Details are provided in the service's [README](https://github.com/rwth-acis/hye-python-mllib/blob/master/README.md).
+By default, the service is configured to use the model that can be downloaded [here](https://drive.google.com/file/d/0B7XkCwpI5KDYNlNUTTlSS21pQmM/edit?usp=sharing) which is then mounted into the directory as a volume.
+
+By default, the server tries to bind to port `8000` which can be adjusted with the `SERVICE_PORT` environment variable.
+Furthermore, the word2vec model location can be changed via the `MODEL_LOCATION` variable, and using the `MODEL_URL` variable, the docker container first tries to download the model from the provided URL and store it at the specified `MODEL_LOCATION`.
+
 ### Nginx
 This container starts an nginx reverse proxy which manages the web paths to the respective service paths.
 This is necessary as requests, sometimes authenticated through cookies, have to be made to the different sub-systems of the project which is only possible if these requests do not violate the [CORS policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS).
-This containers configuration can be adjusted by editing the repsective conf file for docker-compose or the configmap file for the kubernetes deployment.
+This containers configuration can be adjusted by editing the respective conf file for docker-compose or the configmap file for the kubernetes deployment.
 
 ## Kubernetes
 The files stored in the kubernetes directory contain the configurations used by the service instance deployed to the tech4comp cluster available under https://hye.tech4comp.dbis.rwth-aachen.de/.
