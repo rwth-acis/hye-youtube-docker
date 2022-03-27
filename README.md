@@ -29,6 +29,25 @@ The Proxy service is then automatically started together with the node and web c
 Once the node has started, visit [/hye-youtube/init](http://localhost:8080/hye-youtube/init) to initialize the service.
 ***For more details regarding the configuration of this service, please refer to the [README](https://github.com/rwth-acis/hye-youtube-proxy#configurations-properties) contained in its repository.***
 
+#### Configuration parameters
+The following parameters are passed as environment variables either to the respective container in the docker-compose file or the respective kubernetes deployment file.
+
+| Variable Name | Default Value | Description |
+| ------------- | ------------- | ----------- |
+| `LAS2PEER_PORT` | 9011 | Port connected to by las2peer |
+| `LAS2PEER_ETH_HOST` | - | Denotes the location of the ethereum blockchain and should generally be set to `ethereum:8545` |
+| `COMMUNITY_TAG_INDEX` | 0xeB510FB89C25cc1Af61fE45B965b5Fe27F1BCBa0 | Location of the community tag registry on the blockchain (required by las2peer core) |
+| `USER_REGISTRY_ADDRESS` | 0x0e8acA05A8B35516504690Fa97fAEa69bbAFf901 | Location of the user registry on the blockchain (required by las2peer core) |
+| `REPUTATION_REGISTRY_ADDRESS` | 0xd35284B7644732094338559c13a5CE880D247D37 | Location of the reputation registry on the blockchain (required by las2peer core) |
+| `GROUP_REGISTRY_ADDRESS` | 0x1A37393184eD5D0040521728cBbfc819e07E9d20 | Location of the group registry on the blockchain (required by las2peer core) |
+| `SERVICE_REGISTRY_ADDRESS` | 0x4930DC85997124F6cFBe8fAE727EA69E9577BBBc | Location of the service registry on the blockchain (required by las2peer core) |
+| `CONSENT_REGISTRY_ADDRESS` | 0xC58238a482e929584783d13A684f56Ca5249243E | See [service README](https://github.com/rwth-acis/hye-youtube-proxy#configurations-properties) |
+| `HYE_SERVICE_AGENT_NAME` | hyeAgent | Name of the las2peer service agent (the service attempts to create it upon container startup) |
+| `HYE_SERVICE_AGENT_PW` | changeme | Password associated with the service agent |
+| `WEBCONNECTOR_URL` | http://localhost:8080/hye-youtube/ | See `rootUri` in [service README](https://github.com/rwth-acis/hye-youtube-proxy#configurations-properties) |
+| `FRONTEND_URLS` | localhost:8000,hye-youtube.de | See [service README](https://github.com/rwth-acis/hye-youtube-proxy#configurations-properties) |
+| `SLEEP_FOR` | 30 | Time in seconds to wait before deploying the smart contracts (i.e., the above described registries) to the ethereum blockchain (generally, does not need to be changed) |
+
 ### las2peer services
 The HyE - YouTube frontend requires the following additional services to function:
 
@@ -43,18 +62,11 @@ The following parameters are passed as environment variables either to the respe
 
 | Variable Name | Default Value | Description |
 | ------------- | ------------- | ----------- |
+| `LAS2PEER_PORT` | 9011 | Port connected to by las2peer |
+| `BOOTSTRAP` | - | Domain and port of running las2peer node to connect to, instead of starting a new network |
 | `LAS2PEER_ETH_HOST` | - | Denotes the location of the ethereum blockchain and should generally be set to `ethereum:8545` |
-| `COMMUNITY_TAG_INDEX` | 0xeB510FB89C25cc1Af61fE45B965b5Fe27F1BCBa0 | Location of the community tag registry on the blockchain (required by las2peer core) |
-| `USER_REGISTRY_ADDRESS` | 0x0e8acA05A8B35516504690Fa97fAEa69bbAFf901 | Location of the user registry on the blockchain (required by las2peer core) |
-| `REPUTATION_REGISTRY_ADDRESS` | 0xd35284B7644732094338559c13a5CE880D247D37 | Location of the reputation registry on the blockchain (required by las2peer core) |
-| `GROUP_REGISTRY_ADDRESS` | 0x1A37393184eD5D0040521728cBbfc819e07E9d20 | Location of the group registry on the blockchain (required by las2peer core) |
-| `SERVICE_REGISTRY_ADDRESS` | 0x4930DC85997124F6cFBe8fAE727EA69E9577BBBc | Location of the service registry on the blockchain (required by las2peer core) |
-| `CONSENT_REGISTRY_ADDRESS` | 0xC58238a482e929584783d13A684f56Ca5249243E | See [service README](https://github.com/rwth-acis/hye-youtube-proxy#configurations-properties) |
-| `HYE_SERVICE_AGENT_NAME` | hyeAgent | Name of the las2peer service agent (the service attempts to create it upon container startup) |
-| `HYE_SERVICE_AGENT_PW` | changeme | Password associated with the service agent |
-| `WEBCONNECTOR_URL` | http://localhost:8080/hye-youtube/ | See `rootUri` in [service README](https://github.com/rwth-acis/hye-youtube-proxy#configurations-properties) |
-| `FRONTEND_URLS` | localhost:8000,hye-youtube.de | See [service README](https://github.com/rwth-acis/hye-youtube-proxy#configurations-properties) |
-| `SLEEP_FOR` | 30 | Time in seconds to wait before deploying the smart contracts (i.e., the above described registries) to the ethereum blockchain (generally, does not need to be changed) |
+| `CONTACT_STORER_NAME` | hyeAgent | Name of the las2peer service agent used to manage contact data |
+| `CONTACT_STORER_PW` | changeme | Password associated with the service agent |
 
 ### HyE - YouTube Recommendations
 The Recommendations service is a also a [las2peer](https://github.com/rwth-acis/las2peer) service starting a las2peer node and trying to connect to the blockchain.
@@ -72,6 +84,7 @@ The following parameters are passed as environment variables either to the respe
 
 | Variable Name | Default Value | Description |
 | ------------- | ------------- | ----------- |
+| `LAS2PEER_PORT` | 9011 | Port connected to by las2peer |
 | `BOOTSTRAP` | - | Domain and port of running las2peer node to connect to, instead of starting a new network |
 | `LAS2PEER_ETH_HOST` | - | Denotes the location of the ethereum blockchain and should generally be set to `ethereum:8545` |
 | `HYE_SERVICE_AGENT_NAME` | hyeAgent | Name of the las2peer service agent (has to be created beforehand) |
